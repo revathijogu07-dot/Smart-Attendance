@@ -1,0 +1,475 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .card h2 {
+            color: #2563eb;
+            font-size: 30px;
+            margin-top: 8px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+        }
+
+        input, select, button {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            color: white;
+            background: #2563eb;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .search-box {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .present {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .absent {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .present-btn {
+            background: #16a34a;
+            margin-right: 5px;
+        }
+
+        .present-btn:hover {
+            background: #15803d;
+        }
+
+        .absent-btn {
+            background: #dc2626;
+        }
+
+        .absent-btn:hover {
+            background: #b91c1c;
+        }
+
+        .delete-btn {
+            background: #6b7280;
+        }
+
+        .delete-btn:hover {
+            background: #4b5563;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .download {
+            background: #7c3aed;
+            margin-top: 15px;
+        }
+
+        .download:hover {
+            background: #6d28d9;
+        }
+
+        @media (max-width: 800px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📊 Smart Attendance System</h1>
+    <p>Manage student attendance easily</p>
+</header>
+
+<div class="container">
+
+    <!-- Statistics -->
+    <div class="cards">
+        <div class="card">
+            <p>Total Students</p>
+            <h2 id="totalStudents">0</h2>
+        </div>
+
+        <div class="card">
+            <p>Present Today</p>
+            <h2 id="presentStudents">0</h2>
+        </div>
+
+        <div class="card">
+            <p>Absent Today</p>
+            <h2 id="absentStudents">0</h2>
+        </div>
+
+        <div class="card">
+            <p>Attendance %</p>
+            <h2 id="attendancePercentage">0%</h2>
+        </div>
+    </div>
+
+    <!-- Add Student -->
+    <div class="panel">
+        <h2>➕ Add Student</h2>
+
+        <div class="form">
+            <input type="text" id="studentName" placeholder="Student Name">
+
+            <input type="text" id="studentRoll"
+                   placeholder="Roll Number">
+
+            <button onclick="addStudent()">Add Student</button>
+        </div>
+    </div>
+
+    <!-- Attendance -->
+    <div class="panel">
+        <h2>📋 Today's Attendance</h2>
+
+        <input
+            type="text"
+            id="search"
+            class="search-box"
+            placeholder="Search student..."
+            onkeyup="displayStudents()"
+        >
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No.</th>
+                    <th>Student Name</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentTable">
+            </tbody>
+        </table>
+
+        <button class="download" onclick="downloadReport()">
+            📥 Download Attendance Report
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+
+    // Add Student
+    function addStudent() {
+
+        const name = document.getElementById("studentName").value.trim();
+        const roll = document.getElementById("studentRoll").value.trim();
+
+        if (name === "" || roll === "") {
+            alert("Please enter student name and roll number.");
+            return;
+        }
+
+        // Check duplicate roll number
+        if (students.some(student => student.roll === roll)) {
+            alert("Roll number already exists.");
+            return;
+        }
+
+        const student = {
+            name: name,
+            roll: roll,
+            status: "Not Marked"
+        };
+
+        students.push(student);
+
+        saveData();
+
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentRoll").value = "";
+
+        displayStudents();
+    }
+
+    // Mark Attendance
+    function markAttendance(index, status) {
+
+        students[index].status = status;
+
+        saveData();
+        displayStudents();
+    }
+
+    // Delete Student
+    function deleteStudent(index) {
+
+        if (confirm("Are you sure you want to delete this student?")) {
+
+            students.splice(index, 1);
+
+            saveData();
+            displayStudents();
+        }
+    }
+
+    // Display Students
+    function displayStudents() {
+
+        const table = document.getElementById("studentTable");
+        const search = document.getElementById("search").value.toLowerCase();
+
+        table.innerHTML = "";
+
+        students.forEach((student, index) => {
+
+            if (
+                student.name.toLowerCase().includes(search) ||
+                student.roll.toLowerCase().includes(search)
+            ) {
+
+                let statusHTML;
+
+                if (student.status === "Present") {
+                    statusHTML = '<span class="present">Present</span>';
+                }
+                else if (student.status === "Absent") {
+                    statusHTML = '<span class="absent">Absent</span>';
+                }
+                else {
+                    statusHTML = "Not Marked";
+                }
+
+                table.innerHTML += `
+                    <tr>
+                        <td>${student.roll}</td>
+
+                        <td>${student.name}</td>
+
+                        <td>${statusHTML}</td>
+
+                        <td>
+                            <div class="actions">
+
+                                <button
+                                    class="present-btn"
+                                    onclick="markAttendance(${index}, 'Present')">
+                                    Present
+                                </button>
+
+                                <button
+                                    class="absent-btn"
+                                    onclick="markAttendance(${index}, 'Absent')">
+                                    Absent
+                                </button>
+
+                                <button
+                                    class="delete-btn"
+                                    onclick="deleteStudent(${index})">
+                                    Delete
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        updateStatistics();
+    }
+
+    // Statistics
+    function updateStatistics() {
+
+        const total = students.length;
+
+        const present = students.filter(
+            student => student.status === "Present"
+        ).length;
+
+        const absent = students.filter(
+            student => student.status === "Absent"
+        ).length;
+
+        const percentage =
+            total === 0
+                ? 0
+                : Math.round((present / total) * 100);
+
+        document.getElementById("totalStudents").textContent = total;
+
+        document.getElementById("presentStudents").textContent = present;
+
+        document.getElementById("absentStudents").textContent = absent;
+
+        document.getElementById("attendancePercentage").textContent =
+            percentage + "%";
+    }
+
+    // Save data in browser
+    function saveData() {
+        localStorage.setItem("students", JSON.stringify(students));
+    }
+
+    // Download CSV Report
+    function downloadReport() {
+
+        if (students.length === 0) {
+            alert("No students available.");
+            return;
+        }
+
+        let csv = "Roll Number,Student Name,Attendance Status\n";
+
+        students.forEach(student => {
+
+            csv += `"${student.roll}","${student.name}","${student.status}"\n`;
+
+        });
+
+        const blob = new Blob([csv], {
+            type: "text/csv"
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "attendance_report.csv";
+
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    // Initial display
+    displayStudents();
+
+</script>
+
+</body>
+</html>
+```
